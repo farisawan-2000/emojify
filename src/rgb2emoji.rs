@@ -1,11 +1,3 @@
-use image::{
-    GenericImageView,
-    DynamicImage,
-    ImageBuffer,
-    Rgba,
-    imageops,
-    imageops::FilterType::Lanczos3,
-};
 use std::collections::HashMap;
 
 // pub fn search(tbl: &HashMap<u32, char>, entry: u32)

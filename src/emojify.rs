@@ -1,15 +1,15 @@
 use image::{
-    GenericImageView,
+    // GenericImageView,
     DynamicImage,
-    ImageBuffer,
+    // ImageBuffer,
     Rgba,
     imageops,
     imageops::FilterType::Lanczos3,
 };
-use image::io::Reader as ImageReader;
+// use image::io::Reader as ImageReader;
 use std::collections::HashMap;
 use super::rgb2emoji;
-use itertools::izip;
+// use itertools::izip;
 
 fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
     let px = payload.2;
@@ -29,8 +29,6 @@ pub fn emojify(tbl: &HashMap<u32, char>, width: u32, path: &String) {
 
     let (mut wd, ht) = img.dimensions();
 
-    let mut emojis : Vec<char> = Vec::new();
-    
     let mut resultImg = DynamicImage::new_rgba8(wd * 16, ht * 16);
     // let colors = pixels;
 
@@ -72,6 +70,6 @@ pub fn emojify(tbl: &HashMap<u32, char>, width: u32, path: &String) {
         }
     }
 
-    resultImg.save("output.png");
+    let _ = resultImg.save("output.png");
 }
 
