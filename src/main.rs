@@ -71,13 +71,8 @@ fn main() {
     // get width
     let im_width : u32 = str::parse::<u32>(&args[1]).unwrap();
 
-    // we will just have a list of frames to process. If len 1 then png, otherwise gif
-    let frames : Vec<Frame> = Vec::new();
     let emojiTable = rgb2emoji::generate();
 
-    // get either image or gif from arg or clipboard
-
-    // full args
     let filepath : &String = match args.len() {
         2 => {
             // clipboard; guess format
@@ -94,22 +89,22 @@ fn main() {
                 match resp.headers()["content-type"].to_str().unwrap() {
                     "image/gif" => {
                         let fil = File::create("tmp.gif").unwrap();
-                        resp.write_to(fil);
+                        let _ = resp.write_to(fil);
                         &String::from("tmp.gif")
                     },
                     "image/jpeg" => {
                         let fil = File::create("tmp.jpg").unwrap();
-                        resp.write_to(fil);
+                        let _ = resp.write_to(fil);
                         &String::from("tmp.jpg")
                     },
                     "image/png" => {
                         let fil = File::create("tmp.png").unwrap();
-                        resp.write_to(fil);
+                        let _ = resp.write_to(fil);
                         &String::from("tmp.png")
                     },
                     "image/webp" => {
                         let fil = File::create("tmp.webp").unwrap();
-                        resp.write_to(fil);
+                        let _ = resp.write_to(fil);
                         &String::from("tmp.webp")
                     },
                     _ => {
