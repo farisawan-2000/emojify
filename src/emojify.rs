@@ -22,14 +22,14 @@ fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
 
 // TODO: Convert Frame to RgbaImage and back in here
 pub fn emojify(
-    map: &mut HashMap<String, RgbaImage>,
+    map: &mut HashMap<char, RgbaImage>,
     tbl: &HashMap<u32, char>,
     img: Frame
 ) -> Frame {
     let image = img.buffer();
     let delay = img.delay();
 
-    let (mut wd, ht) = image.dimensions();
+    let (wd, ht) = image.dimensions();
 
     let mut resultImg = DynamicImage::new_rgba8(wd * 16, ht * 16);
     // let colors = pixels;
@@ -48,30 +48,17 @@ pub fn emojify(
 
     let mut cursor = 0;
 
-    wd -= 1;
+    // wd -= 1;
 
     // TODO: make this global so we can save it every frame
     
 
     for i in emojis {
-        let home = std::env::var("HOME").unwrap();
-
-        let emojipath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, i as u32);
-        match map.get(&emojipath) {
-            Some(emoji) => {
-                imageops::overlay(&mut resultImg, emoji, x, y);
-            },
-            None => {
-                let em = image::open(emojipath.clone()).unwrap().into_rgba8();
-                map.insert(emojipath.clone(), em);
-                imageops::overlay(&mut resultImg, &map[&emojipath.clone()], x, y);
-            }
-        }
-
+        imageops::overlay(&mut resultImg, &map[&i], x, y);
 
         cursor += 1;
         x += 16;
-        if cursor > wd {
+        if cursor >= wd {
             x = 0;
             cursor = 0;
             y += 16;

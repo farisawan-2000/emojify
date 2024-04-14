@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use maplit::hashmap;
 
 // pub fn search(tbl: &HashMap<u32, char>, entry: u32)
 pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {

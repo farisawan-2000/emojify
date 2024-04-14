@@ -1,5 +1,4 @@
-#![feature(const_trait_impl)]
-#[macro_use] extern crate maplit;
+#![allow(non_snake_case)]
 
 use std::process::exit;
 use std::path::Path;
@@ -33,7 +32,7 @@ fn usage() {
 }
 
 fn open_gif(width: u32, path: &String) -> Vec<Frame> {
-    let file_in = BufReader::new(File::open(path).unwrap());
+    let file_in = BufReader::with_capacity(73728, File::open(path).unwrap());
     let decoder = GifDecoder::new(file_in).unwrap();
     let frames = decoder.into_frames();
     let frames = frames.collect_frames().expect("error decoding gif");
@@ -52,7 +51,7 @@ fn open_gif(width: u32, path: &String) -> Vec<Frame> {
     return ret;
 }
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args : Vec<String> = std::env::args().collect();
 
     match args.len() {
@@ -72,10 +71,20 @@ fn main() {
     // get width
     let im_width : u32 = str::parse::<u32>(&args[1]).unwrap();
 
-    let emojiTable = rgb2emoji::generate();
+    let emojiTable = rgb2emoji::generate(); // color -> emoji char
 
-    // global emoji map
-    let mut emojimap : HashMap<String, RgbaImage> = HashMap::new();
+    // populate the emoji -> image map using stored font
+    // TODO: serialize?
+    println!("Populating emoji map...");
+    let mut emojimap : HashMap<char, RgbaImage> = HashMap::new(); // char -> image
+    let home = std::env::var("HOME").unwrap();
+    for (_i, c) in &emojiTable {
+        let emojipath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, *c as u32);
+
+        let em = image::open(emojipath.clone()).unwrap().into_rgba8();
+        emojimap.insert(*c, em);
+    }
+    
 
     let filepath : &String = match args.len() {
         2 => {
@@ -84,42 +93,47 @@ fn main() {
             let g = clipboard.get();
             let gt = g.text().unwrap();
 
-            let resp = attohttpc::get(&gt).send().unwrap();
+            let basename_pt = Path::new(&gt).file_name().unwrap();
+            let basename = basename_pt.to_str().unwrap();
 
-            // Check if the status is a 2XX code.
-            if resp.is_success() {
-                // Consume the response body as text and print it.
-                // let tmpImg = DynamicImage::from_bytes(resp.bytes());
-                match resp.headers()["content-type"].to_str().unwrap() {
-                    "image/gif" => {
-                        let fil = File::create("tmp.gif").unwrap();
-                        let _ = resp.write_to(fil);
-                        &String::from("tmp.gif")
-                    },
-                    "image/jpeg" => {
-                        let fil = File::create("tmp.jpg").unwrap();
-                        let _ = resp.write_to(fil);
-                        &String::from("tmp.jpg")
-                    },
-                    "image/png" => {
-                        let fil = File::create("tmp.png").unwrap();
-                        let _ = resp.write_to(fil);
-                        &String::from("tmp.png")
-                    },
-                    "image/webp" => {
-                        let fil = File::create("tmp.webp").unwrap();
-                        let _ = resp.write_to(fil);
-                        &String::from("tmp.webp")
-                    },
-                    _ => {
-                        println!("{:?} is not a supported file!", resp.headers()["content-type"]);
-                        exit(1);
+            if !Path::new(basename_pt).exists() {
+                println!("Downloading clipboard link: {}", &gt);
+
+                let _ = std::fs::create_dir("cacheDownload/");
+
+                let resp = attohttpc::get(&gt).send().unwrap();
+
+                // Check if the status is a 2XX code.
+                if resp.is_success() {
+                    let fil = File::create(format!("cacheDownload/{}", basename)).unwrap();
+                    // Consume the response body as text and print it.
+                    // let tmpImg = DynamicImage::from_bytes(resp.bytes());
+                    match resp.headers()["content-type"].to_str().unwrap() {
+                        "image/gif" => {
+                            let _ = resp.write_to(fil);
+                        },
+                        "image/jpeg" => {
+                            let _ = resp.write_to(fil);
+                        },
+                        "image/png" => {
+                            let _ = resp.write_to(fil);
+                        },
+                        "image/webp" => {
+                            let _ = resp.write_to(fil);
+                        },
+                        _ => {
+                            println!("{:?} is not a supported file!", resp.headers()["content-type"]);
+                            exit(1);
+                        }
                     }
+                } else {
+                    println!("'{}' is not a URL!", gt);
+                    exit(1);
                 }
-            } else {
-                println!("'{}' is not a URL!", gt);
-                exit(1);
+
             }
+
+            &String::from(format!("cacheDownload/{}", basename))
         },
         3 => {
             &args[2]
@@ -167,5 +181,7 @@ fn main() {
             exit(1);
         }
     }
-    
+ 
+
+    Ok(())   
 }

@@ -3,6 +3,14 @@ name = "emojify"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "emojify"
+path = "src/main.rs"
+
+[[bin]]
+name = "fonttool"
+path = "src/fonttool/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -12,3 +20,4 @@ gif = "0.13.1"
 image = "0.24.6"
 itertools = "0.10.5"
 maplit = "1.0.2"
+serde = "1.0.197"
