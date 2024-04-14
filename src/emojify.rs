@@ -21,7 +21,11 @@ fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
 }
 
 // TODO: Convert Frame to RgbaImage and back in here
-pub fn emojify(tbl: &HashMap<u32, char>, img: Frame) -> Frame {
+pub fn emojify(
+    map: &mut HashMap<String, RgbaImage>,
+    tbl: &HashMap<u32, char>,
+    img: Frame
+) -> Frame {
     let image = img.buffer();
     let delay = img.delay();
 
@@ -47,20 +51,20 @@ pub fn emojify(tbl: &HashMap<u32, char>, img: Frame) -> Frame {
     wd -= 1;
 
     // TODO: make this global so we can save it every frame
-    let mut emojimap : HashMap<String, RgbaImage> = HashMap::new();
+    
 
     for i in emojis {
         let home = std::env::var("HOME").unwrap();
 
         let emojipath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, i as u32);
-        match emojimap.get(&emojipath) {
+        match map.get(&emojipath) {
             Some(emoji) => {
                 imageops::overlay(&mut resultImg, emoji, x, y);
             },
             None => {
                 let em = image::open(emojipath.clone()).unwrap().into_rgba8();
-                emojimap.insert(emojipath.clone(), em);
-                imageops::overlay(&mut resultImg, &emojimap[&emojipath.clone()], x, y);
+                map.insert(emojipath.clone(), em);
+                imageops::overlay(&mut resultImg, &map[&emojipath.clone()], x, y);
             }
         }
 

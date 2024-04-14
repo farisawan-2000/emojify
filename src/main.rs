@@ -7,12 +7,13 @@ use std::fs::File;
 use attohttpc;
 use image::{
     DynamicImage,
-    // RgbaImage,
+    RgbaImage,
     Frame,
     Delay,
     imageops::FilterType::Lanczos3,
     AnimationDecoder,
 };
+use std::collections::HashMap;
 use image::codecs::gif::{Repeat, GifDecoder, GifEncoder};
 use std::io::{BufReader, BufWriter};
 use arboard::Clipboard;
@@ -72,6 +73,9 @@ fn main() {
     let im_width : u32 = str::parse::<u32>(&args[1]).unwrap();
 
     let emojiTable = rgb2emoji::generate();
+
+    // global emoji map
+    let mut emojimap : HashMap<String, RgbaImage> = HashMap::new();
 
     let filepath : &String = match args.len() {
         2 => {
@@ -143,7 +147,7 @@ fn main() {
             for (i, f) in frames.iter().enumerate() {
                 println!("Processing Frame {} of {}", i + 1, frames.len());
 
-                let result = emojify::emojify(&emojiTable, f.clone());
+                let result = emojify::emojify(&mut emojimap, &emojiTable, f.clone());
 
                 bufFrames.push(result);
             }
@@ -151,7 +155,7 @@ fn main() {
         },
         Some("png") | Some("jpg") | Some("webp") => {
             let img = open_img(im_width, filepath);
-            let result = emojify::emojify(&emojiTable, img).into_buffer();
+            let result = emojify::emojify(&mut emojimap, &emojiTable, img).into_buffer();
             let _ = result.save("output.png");
         },
         Some(&_) => {
