@@ -1,15 +1,14 @@
 use image::{
-    // GenericImageView,
+    RgbaImage,
     DynamicImage,
-    // ImageBuffer,
     Rgba,
+    Frame,
+    // Delay,
     imageops,
-    imageops::FilterType::Lanczos3,
+    // GenericImageView,
 };
-// use image::io::Reader as ImageReader;
 use std::collections::HashMap;
 use super::rgb2emoji;
-// use itertools::izip;
 
 fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
     let px = payload.2;
@@ -21,28 +20,22 @@ fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
     return (payload.0, payload.1, color);
 }
 
-pub fn emojify(tbl: &HashMap<u32, char>, width: u32, path: &String) {
+// TODO: Convert Frame to RgbaImage and back in here
+pub fn emojify(tbl: &HashMap<u32, char>, img: Frame) -> Frame {
+    let image = img.buffer();
+    let delay = img.delay();
 
-    let binding = image::open(path).unwrap()
-        .resize(width, 999999, Lanczos3);
-    let img = binding.as_rgba8().unwrap();
-
-    let (mut wd, ht) = img.dimensions();
+    let (mut wd, ht) = image.dimensions();
 
     let mut resultImg = DynamicImage::new_rgba8(wd * 16, ht * 16);
     // let colors = pixels;
 
-    let pixels = img.enumerate_pixels().map(pack_color);
+    let pixels = image.enumerate_pixels().map(pack_color);
 
     let mut emojis : Vec<char> = Vec::new();
     for i in pixels {
         emojis.push(rgb2emoji::search(tbl, i.2));
     }
-
-
-
-
-
 
     // emojis.iter().map(commit_pixel);
 
@@ -53,13 +46,24 @@ pub fn emojify(tbl: &HashMap<u32, char>, width: u32, path: &String) {
 
     wd -= 1;
 
+    // TODO: make this global so we can save it every frame
+    let mut emojimap : HashMap<String, RgbaImage> = HashMap::new();
+
     for i in emojis {
         let home = std::env::var("HOME").unwrap();
 
-        let filepath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, i as u32);
-        let em = image::open(filepath).unwrap();
+        let emojipath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, i as u32);
+        match emojimap.get(&emojipath) {
+            Some(emoji) => {
+                imageops::overlay(&mut resultImg, emoji, x, y);
+            },
+            None => {
+                let em = image::open(emojipath.clone()).unwrap().into_rgba8();
+                emojimap.insert(emojipath.clone(), em);
+                imageops::overlay(&mut resultImg, &emojimap[&emojipath.clone()], x, y);
+            }
+        }
 
-        imageops::overlay(&mut resultImg, &em, x, y);
 
         cursor += 1;
         x += 16;
@@ -70,6 +74,6 @@ pub fn emojify(tbl: &HashMap<u32, char>, width: u32, path: &String) {
         }
     }
 
-    let _ = resultImg.save("output.png");
+    return Frame::from_parts(resultImg.into_rgba8(), 0, 0, delay);
 }
 
