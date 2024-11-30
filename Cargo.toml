@@ -11,13 +11,22 @@ path = "src/main.rs"
 name = "fonttool"
 path = "src/fonttool/main.rs"
 
+[[bin]]
+name = "emojify-camera"
+path = "src/main-camera.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 arboard = "3.3.2"
 attohttpc = "0.28.0"
+eye = "0.5.0"
+eye-hal = "0.2.0"
 gif = "0.13.1"
 image = "0.24.6"
 itertools = "0.10.5"
 maplit = "1.0.2"
 serde = "1.0.197"
+show-image = "0.14.0"
+zerocopy = "0.7.32"
+
