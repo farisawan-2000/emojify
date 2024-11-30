@@ -3,5 +3,6 @@
 *.gif
 *.webp
 *.jpg
+cacheDownload/*
 
 
