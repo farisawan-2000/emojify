@@ -1,6 +1,16 @@
 # emojify
 ### Turn your images into elegant emoji grids
 ---
+
+## Examples
+
+(If these images have credits please let me know)
+
+| Input | Output |
+| :-------: | :-------: |
+| ![](.samples/realInput.png) | ![](.samples/realOutput.png) |
+| ![](.samples/gif-input.gif) | ![](.samples/gif-output.gif) |
+
 ## Usage
 
 You know how to build Rust apps. Two binaries are built: `emojify`, and `emojify-camera`
@@ -25,9 +35,26 @@ This program utilizes multiprocessing for each pixel conversion, and is really f
 
 `emojify` can use any emoji font (and also technically any image set at all, but you're on your own there).
 
-To make a custom emoji font, reference the hashmap at `src/rgb2emoji.rs` (You will also want to regenerate it to update the average colors). An emoji image set folder has 16x16 representations of any emoji you want
+The two files of concern are `src/emojimap.rs` and `src/config.rs`. To add a new emoji font, it should be a folder of images, all the same size, named after the lowercase codepoint of an emoji glyph in Unicode. See how it looks on my end:
 
+```
+$ tree ~/emojifont/ | head
+~/emojifont/
+├── 1f004.png
+├── 1f0cf.png
+├── 1f170.png
+├── 1f171.png
+├── 1f17e.png
+├── 1f17f.png
+├── 1f18e.png
+├── 1f191.png
+└── 1f192.png
+```
+
+Next, edit `src/config.rs` so `EMOJI_WD` and `EMOJI_HT` match your new font. Additionally, point the format path in `get_emoji_path` to your own font folder (discard the provided `home` argument as necessary).
+
+Finally, regenerate the hashmap stored in `src/emojimap.rs`, as that color data is generated from 16x16 sample data from [twemoji](https://github.com/twitter/twemoji).
 
 ## Limitations
 
-- Compound emojis joined with a ZWJ are not tested.
+- Compound emojis joined with a ZWJ do not work.
