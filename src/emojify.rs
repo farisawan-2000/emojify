@@ -9,6 +9,9 @@ use image::{
 };
 use std::collections::HashMap;
 use super::rgb2emoji;
+// use super::config;
+// use super::config;
+use crate::config;
 
 fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
     let px = payload.2;
@@ -31,7 +34,7 @@ pub fn emojify(
 
     let (wd, ht) = image.dimensions();
 
-    let mut resultImg = DynamicImage::new_rgba8(wd * 16, ht * 16);
+    let mut resultImg = DynamicImage::new_rgba8(wd * config::EMOJI_WD, ht * config::EMOJI_HT);
     // let colors = pixels;
 
     let pixels = image.enumerate_pixels().map(pack_color);
@@ -43,8 +46,8 @@ pub fn emojify(
 
     // emojis.iter().map(commit_pixel);
 
-    let mut x = 0;
-    let mut y = 0;
+    let mut x : u32 = 0;
+    let mut y : u32 = 0;
 
     let mut cursor = 0;
 
@@ -54,14 +57,14 @@ pub fn emojify(
     
 
     for i in emojis {
-        imageops::overlay(&mut resultImg, &map[&i], x, y);
+        imageops::overlay(&mut resultImg, &map[&i], x as i64, y as i64);
 
         cursor += 1;
-        x += 16;
+        x += config::EMOJI_WD;
         if cursor >= wd {
             x = 0;
             cursor = 0;
-            y += 16;
+            y += config::EMOJI_HT;
         }
     }
 

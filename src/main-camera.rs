@@ -7,11 +7,11 @@ use image::RgbaImage;
 use image::Delay;
 use image::Frame;
 use image::imageops::Lanczos3;
-use zerocopy::AsBytes;
-use show_image::{ImageView, ImageInfo, event, create_window};
+use show_image::{ImageView, ImageInfo, create_window};
 
 mod emojify;
 mod rgb2emoji;
+mod config;
 
 fn usage() {
     println!("Usage: {} image_width", std::env::args().nth(0).unwrap());
@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut emojimap : HashMap<char, RgbaImage> = HashMap::new(); // char -> image
     let home = std::env::var("HOME").unwrap();
     for (_i, c) in &emojiTable {
-        let emojipath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, *c as u32);
+        let emojipath = config::get_emoji_path(&home, *c as u32);
 
         let em = image::open(emojipath.clone()).unwrap().into_rgba8();
         emojimap.insert(*c, em);

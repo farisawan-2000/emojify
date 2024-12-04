@@ -18,6 +18,7 @@ use std::io::{BufReader, BufWriter};
 use arboard::Clipboard;
 
 mod emojify;
+mod config;
 mod rgb2emoji;
 
 fn open_img(width: u32, path: &String) -> Frame {
@@ -79,7 +80,7 @@ fn main() -> std::io::Result<()> {
     let mut emojimap : HashMap<char, RgbaImage> = HashMap::new(); // char -> image
     let home = std::env::var("HOME").unwrap();
     for (_i, c) in &emojiTable {
-        let emojipath = format!("{}/Devel/twemoji/assets/16x16/{:x}.png", home, *c as u32);
+        let emojipath = config::get_emoji_path(&home, *c as u32);
 
         let em = image::open(emojipath.clone()).unwrap().into_rgba8();
         emojimap.insert(*c, em);
