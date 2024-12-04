@@ -27,7 +27,7 @@ You can also use an image in your clipboard, or have it download an image/GIF fr
 
 `./emojify <output grid width>`
 
-This program utilizes multiprocessing for each pixel conversion, and is really fast as a result. This is why a second proof-of-concept binary, `emojify-camera`, is provided to show that conversion can happen in real time at certain resolutions.
+This program utilizes multiprocessing for each pixel conversion, and is really fast as a result. So fast, in fact, that this repo also builds, `emojify-camera`, which works in real time at certain resolutions.
 
 `./emojify-camera <output grid width>`
 
