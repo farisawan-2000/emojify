@@ -4,5 +4,7 @@
 *.webp
 *.jpg
 cacheDownload/*
+!.samples/*
+
 
 
