@@ -13,12 +13,15 @@ mod emojify;
 mod rgb2emoji;
 mod config;
 
+use nokhwa::{
+    Camera,
+    utils::{CameraIndex, RequestedFormat, RequestedFormatType},
+    pixel_format::RgbFormat,
+};
+
 fn usage() {
     println!("Usage: {} image_width", std::env::args().nth(0).unwrap());
 }
-
-use eye_hal::traits::{Context, Device, Stream};
-use eye_hal::PlatformContext;
 
 #[show_image::main]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -51,25 +54,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         emojimap.insert(*c, em);
     }
 
-    // Create a context
-    let ctx = PlatformContext::default();
+    // first camera in system
+    let index = CameraIndex::Index(0); 
+    // request the absolute highest resolution CameraFormat that can be decoded to RGB.
+    let requested = RequestedFormat::new::<RgbFormat>(RequestedFormatType::HighestFrameRate(60));
+    // make the camera
+    let mut camera = Camera::new(index, requested).unwrap();
 
-    // Query for available devices.
-    let devices = ctx.devices()?;
-
-    // First, we need a capture device to read images from. For this example, let's just choose
-    // whatever device is first in the list.
-    let dev = ctx.open_device(&devices[0].uri)?;
-
-    // Query for available streams and just choose the first one.
-    let streams = dev.streams()?;
-    let stream_desc = streams[0].clone();
-    println!("Stream: {:?}", stream_desc);
-
-    // Since we want to capture images, we need to access the native image stream of the device.
-    // The backend will internally select a suitable implementation for the platform stream. On
-    // Linux for example, most devices support memory-mapped buffers.
-    let mut stream = dev.start_stream(&stream_desc)?;
 
     // Here we create a loop and just capture images as long as the device produces them. Normally,
     // this loop will run forever unless we unplug the camera or exit the program.
@@ -88,15 +79,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     }
     // }
 
+    camera.open_stream().unwrap();
+
     loop {
-        let _frame = stream
-            .next()
-            .expect("Stream is dead")
-            .expect("Failed to capture frame");
+        let frame = camera.frame().unwrap();
+        let buffer = frame.buffer(); // &[u8]
 
         println!("new frame!");
 
-        let resized = image::load_from_memory(_frame)?
+        let resized = image::load_from_memory(buffer)?
                             .resize(im_width, 999999, Lanczos3)
                             .into_rgba8();
 

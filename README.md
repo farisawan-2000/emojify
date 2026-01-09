@@ -13,7 +13,7 @@
 
 ## Usage
 
-You know how to build Rust apps. Two binaries are built: `emojify`, and `emojify-camera`
+You know how to build Rust apps. The release build is preferred, since the debug build is literally slower than I had it as written in python. Two binaries are built: `emojify`, and `emojify-camera`
 
 The simplest usage is to have an image and a width in mind.
 
