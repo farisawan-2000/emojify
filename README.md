@@ -53,8 +53,13 @@ $ tree ~/emojifont/ | head
 
 Next, edit `src/config.rs` so `EMOJI_WD` and `EMOJI_HT` match your new font. Additionally, point the format path in `get_emoji_path` to your own font folder (discard the provided `home` argument as necessary).
 
-Finally, regenerate the hashmap stored in `src/emojimap.rs`, as that color data is generated from 16x16 sample data from [twemoji](https://github.com/twitter/twemoji).
+Finally, regenerate the hashmap stored in `src/emojimap.rs`, as that color data is generated from 16x16 sample data from [Twemoji](https://github.com/twitter/twemoji).
 
 ## Limitations
 
 - Compound emojis joined with a ZWJ do not work.
+
+## Acknowledgments
+
+- [Twemoji](https://github.com/twitter/twemoji)
+  - I generated `src/rgb2emoji.rs` based on the images provided in the repo, but `emojify` does not otherwise depend on Twemoji. You can put in your own emoji fonts if you want.
