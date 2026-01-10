@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // first camera in system
     let index = CameraIndex::Index(0); 
     // request the absolute highest resolution CameraFormat that can be decoded to RGB.
-    let requested = RequestedFormat::new::<RgbFormat>(RequestedFormatType::HighestFrameRate(60));
+    let requested = RequestedFormat::new::<RgbFormat>(RequestedFormatType::HighestFrameRate(30));
     // make the camera
     let mut camera = Camera::new(index, requested).unwrap();
 
