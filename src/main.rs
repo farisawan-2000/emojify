@@ -12,6 +12,7 @@ use image::{
     imageops::FilterType::Lanczos3,
     AnimationDecoder,
 };
+use image::io::Reader as ImageReader;
 use std::collections::HashMap;
 use image::codecs::gif::{Repeat, GifDecoder, GifEncoder};
 use std::io::{BufReader, BufWriter};
@@ -22,8 +23,12 @@ mod config;
 mod rgb2emoji;
 
 fn open_img(width: u32, path: &String) -> Frame {
-    let img = image::open(path).unwrap()
-        .resize(width, 999999, Lanczos3).into_rgba8();
+    println!("Opening {} as image...", path);
+    let img = ImageReader::open(path).unwrap()
+        .with_guessed_format().unwrap()
+        .decode().unwrap()
+        .resize(width, 999999, Lanczos3)
+        .into_rgba8();
 
     return Frame::from_parts(img, 0, 0, Delay::from_numer_denom_ms(10, 1));
 }
@@ -50,6 +55,15 @@ fn open_gif(width: u32, path: &String) -> Vec<Frame> {
     }
 
     return ret;
+}
+
+fn truncate_string_at_char(s: &mut String, character: char) -> String {
+    if let Some(index) = s.find(character) {
+        s.truncate(index);
+    }
+
+    return s.to_string();
+    // If the character is not found, the string remains unchanged.
 }
 
 fn main() -> std::io::Result<()> {
@@ -94,7 +108,11 @@ fn main() -> std::io::Result<()> {
             let g = clipboard.get();
             let gt = g.text().unwrap();
 
-            let basename_pt = Path::new(&gt).file_name().unwrap();
+            let mut gt_clean = gt.to_string();
+
+            truncate_string_at_char(&mut gt_clean, '?');
+
+            let basename_pt = Path::new(&gt_clean).file_name().unwrap();
             let basename = basename_pt.to_str().unwrap();
 
             if !Path::new(basename_pt).exists() {
