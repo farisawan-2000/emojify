@@ -119,9 +119,10 @@ fn main() -> std::io::Result<()> {
                 let _ = std::fs::create_dir("cacheDownload/");
 
                 // Check if the status is a 2XX code.
-                if let Ok(resp) = attohttpc::get(&gt).send()
-                    && resp.is_success()
-                {
+
+                let resp = attohttpc::get(&gt).send()?;
+
+                if resp.is_success() {
                     let fil = File::create(format!("cacheDownload/{}", basename))?;
                     // Consume the response body as text and print it.
                     // let tmpImg = DynamicImage::from_bytes(resp.bytes());
@@ -151,7 +152,7 @@ fn main() -> std::io::Result<()> {
                         }
                     }
                 } else {
-                    println!("'{}' is not a URL!", gt);
+                    println!("Bad response code {}, or '{}' is not a URL!", resp.status().as_u16(), gt);
                     exit(1);
                 }
             }
