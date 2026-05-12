@@ -169,8 +169,6 @@ fn main() -> std::io::Result<()> {
         Some("gif") => {
             let frames = open_gif(im_width, filepath);
 
-            // let bufFrames : Vec<Frame> = Vec::new();
-
             let file_out = File::create("output.gif").unwrap();
 
             let bufWriter = BufWriter::with_capacity(163840, file_out);

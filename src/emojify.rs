@@ -3,14 +3,10 @@ use image::{
     DynamicImage,
     Rgba,
     Frame,
-    // Delay,
     imageops,
-    // GenericImageView,
 };
 use std::collections::HashMap;
 use super::rgb2emoji;
-// use super::config;
-// use super::config;
 use crate::config;
 
 fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
@@ -35,7 +31,6 @@ pub fn emojify(
     let (wd, ht) = image.dimensions();
 
     let mut resultImg = DynamicImage::new_rgba8(wd * config::EMOJI_WD, ht * config::EMOJI_HT);
-    // let colors = pixels;
 
     let pixels = image.enumerate_pixels().map(pack_color);
 
@@ -44,17 +39,10 @@ pub fn emojify(
         emojis.push(rgb2emoji::search(tbl, i.2));
     }
 
-    // emojis.iter().map(commit_pixel);
-
     let mut x : u32 = 0;
     let mut y : u32 = 0;
 
     let mut cursor = 0;
-
-    // wd -= 1;
-
-    // TODO: make this global so we can save it every frame
-    
 
     for i in emojis {
         imageops::overlay(&mut resultImg, &map[&i], x as i64, y as i64);

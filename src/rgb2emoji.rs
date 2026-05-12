@@ -1,10 +1,8 @@
 use std::collections::HashMap;
 use maplit::hashmap;
 
-// pub fn search(tbl: &HashMap<u32, char>, entry: u32)
 pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {
     if entry & 0xFF < 128 {
-        // return (payload.0, payload.1, (data.0, data.1, ' '));
         return ' ';
     }
     let mut min_dist = 9999999;
@@ -23,12 +21,8 @@ pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {
             min_colour = tbl[&key];
         }
     }
-    // return (payload.0, payload.1, min_colour);
-    // return min_colour;
     return min_colour;
 }
-
-
 
 pub fn generate() -> HashMap<u32, char> {
     return hashmap!(
