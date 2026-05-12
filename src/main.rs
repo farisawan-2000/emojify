@@ -170,7 +170,7 @@ fn main() -> std::io::Result<()> {
 
     println!("Converting {} to emojis...", &filepath);
 
-    match Path::new(&filepath).extension().and_then(|s| s.to_str()) {
+    match Path::new(&filepath).extension().unwrap().to_str() {
         Some("gif") => {
             let frames = open_gif(im_width, filepath);
 
