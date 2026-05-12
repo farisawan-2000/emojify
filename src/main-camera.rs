@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(clippy::needless_return)]
 
 use std::collections::HashMap;
 use std::process::exit;
@@ -20,7 +21,7 @@ use nokhwa::{
 };
 
 fn usage() {
-    println!("Usage: {} image_width", std::env::args().nth(0).unwrap());
+    println!("Usage: {} image_width", std::env::args().next().unwrap());
 }
 
 #[show_image::main]
@@ -47,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Populating emoji map...");
     let mut emojimap: HashMap<char, RgbaImage> = HashMap::new(); // char -> image
     let home = std::env::var("HOME").unwrap();
-    for (_i, c) in &emojiTable {
+    for c in emojiTable.values() {
         let emojipath = config::get_emoji_path(&home, *c as u32);
 
         let em = image::open(emojipath.clone()).unwrap().into_rgba8();
@@ -101,6 +102,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let im = ImageView::new(ImageInfo::rgba8(wd, ht), &result);
 
-        window.set_image("image-001", &im).expect("set_image fail");
+        window.set_image("image-001", im).expect("set_image fail");
     }
 }

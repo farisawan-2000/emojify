@@ -7,10 +7,10 @@ pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {
     }
     let mut min_dist = 9999999;
     let mut min_colour = ' ';
-    for (key, _val) in tbl {
+    for key in tbl.keys() {
         let r_c = key >> 16;
         let g_c = (key >> 8) & 0xFF;
-        let b_c = (key >> 0) & 0xFF;
+        let b_c = (key) & 0xFF;
 
         let rd = (r_c as i32 - ((entry >> 24) & 0xFF) as i32).pow(2) as u32;
         let gd = (g_c as i32 - ((entry >> 16) & 0xFF) as i32).pow(2) as u32;
@@ -18,7 +18,7 @@ pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {
 
         if (rd + gd + bd) < min_dist {
             min_dist = rd + gd + bd;
-            min_colour = tbl[&key];
+            min_colour = tbl[key];
         }
     }
     return min_colour;

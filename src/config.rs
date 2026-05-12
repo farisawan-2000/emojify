@@ -1,3 +1,5 @@
+#![allow(clippy::needless_return)]
+
 pub const EMOJI_WD: u32 = 16;
 pub const EMOJI_HT: u32 = 16;
 

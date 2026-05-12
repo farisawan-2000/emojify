@@ -1,7 +1,8 @@
 #![allow(non_snake_case)]
+#![allow(clippy::needless_return)]
 
 use arboard::Clipboard;
-use attohttpc;
+// use attohttpc;
 use image::codecs::gif::{GifDecoder, GifEncoder, Repeat};
 use image::io::Reader as ImageReader;
 use image::{
@@ -34,7 +35,7 @@ fn open_img(width: u32, path: &String) -> Frame {
 fn usage() {
     println!(
         "Usage: {} image_width [path/to/image or leave blank for clipboard]",
-        std::env::args().nth(0).unwrap()
+        std::env::args().next().unwrap()
     );
 }
 
@@ -90,7 +91,7 @@ fn main() -> std::io::Result<()> {
     println!("Populating emoji map...");
     let mut emojimap: HashMap<char, RgbaImage> = HashMap::new(); // char -> image
     let home = std::env::var("HOME").unwrap();
-    for (_i, c) in &emojiTable {
+    for c in emojiTable.values() {
         let emojipath = config::get_emoji_path(&home, *c as u32);
 
         if let Ok(em) = image::open(emojipath.clone()) {
@@ -155,7 +156,7 @@ fn main() -> std::io::Result<()> {
                 }
             }
 
-            &String::from(format!("cacheDownload/{}", basename))
+            &format!("cacheDownload/{}", basename)
         }
         3 => &args[2],
         _ => {
