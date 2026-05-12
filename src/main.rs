@@ -121,10 +121,8 @@ fn main() -> std::io::Result<()> {
 
                 let _ = std::fs::create_dir("cacheDownload/");
 
-                let resp = attohttpc::get(&gt).send().unwrap();
-
                 // Check if the status is a 2XX code.
-                if resp.is_success() {
+                if let Ok(resp) = attohttpc::get(&gt).send() && resp.is_success() {
                     let fil = File::create(format!("cacheDownload/{}", basename)).unwrap();
                     // Consume the response body as text and print it.
                     // let tmpImg = DynamicImage::from_bytes(resp.bytes());
