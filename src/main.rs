@@ -169,7 +169,7 @@ fn main() -> std::io::Result<()> {
         Some("gif") => {
             let frames = open_gif(im_width, filepath);
 
-            let mut bufFrames : Vec<Frame> = Vec::new();
+            // let bufFrames : Vec<Frame> = Vec::new();
 
             let file_out = File::create("output.gif").unwrap();
 
@@ -180,15 +180,14 @@ fn main() -> std::io::Result<()> {
             for (i, f) in frames.iter().enumerate() {
                 println!("Processing Frame {} of {}", i + 1, frames.len());
 
-                let result = emojify::emojify(&mut emojimap, &emojiTable, f.clone());
+                let result = emojify::emojify(&mut emojimap, &emojiTable, f);
 
-                bufFrames.push(result);
+                let _ = encoder.encode_frame(result);
             }
-            let _ = encoder.encode_frames(bufFrames);
         },
         Some("png") | Some("jpg") | Some("webp") => {
             let img = open_img(im_width, filepath);
-            let result = emojify::emojify(&mut emojimap, &emojiTable, img).into_buffer();
+            let result = emojify::emojify(&mut emojimap, &emojiTable, &img).into_buffer();
             let _ = result.save("output.png");
         },
         Some(&_) => {

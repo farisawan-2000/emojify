@@ -94,7 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let result = emojify::emojify(
             &mut emojimap,
             &emojiTable,
-            Frame::from_parts(
+            &Frame::from_parts(
                 resized,
                 0, 0,
                 Delay::from_numer_denom_ms(10, 1)

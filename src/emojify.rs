@@ -27,7 +27,7 @@ fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
 pub fn emojify(
     map: &mut HashMap<char, RgbaImage>,
     tbl: &HashMap<u32, char>,
-    img: Frame
+    img: &Frame
 ) -> Frame {
     let image = img.buffer();
     let delay = img.delay();
