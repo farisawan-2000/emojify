@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // get width
-    let im_width: u32 = str::parse::<u32>(&args[1]).unwrap();
+    let im_width: u32 = str::parse::<u32>(&args[1])?;
 
     let emojiTable = rgb2emoji::generate(); // color -> emoji char
 
@@ -47,11 +47,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: serialize?
     println!("Populating emoji map...");
     let mut emojimap: HashMap<char, RgbaImage> = HashMap::new(); // char -> image
-    let home = std::env::var("HOME").unwrap();
+    let home = std::env::var("HOME")?;
     for c in emojiTable.values() {
         let emojipath = config::get_emoji_path(&home, *c as u32);
 
-        let em = image::open(emojipath.clone()).unwrap().into_rgba8();
+        let em = image::open(emojipath.clone())?.into_rgba8();
         emojimap.insert(*c, em);
     }
 
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // request the absolute highest resolution CameraFormat that can be decoded to RGB.
     let requested = RequestedFormat::new::<RgbFormat>(RequestedFormatType::HighestFrameRate(30));
     // make the camera
-    let mut camera = Camera::new(index, requested).unwrap();
+    let mut camera = Camera::new(index, requested)?;
 
     // Here we create a loop and just capture images as long as the device produces them. Normally,
     // this loop will run forever unless we unplug the camera or exit the program.
@@ -79,10 +79,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     }
     // }
 
-    camera.open_stream().unwrap();
+    camera.open_stream()?;
 
     loop {
-        let frame = camera.frame().unwrap();
+        let frame = camera.frame()?;
         let buffer = frame.buffer(); // &[u8]
 
         println!("new frame!");

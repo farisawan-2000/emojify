@@ -14,7 +14,7 @@ use std::process::exit;
 fn usage() {
     println!(
         "Usage: {} path/to/emojifont/",
-        std::env::args().nth(0).unwrap()
+        std::env::args().next().unwrap()
     );
     println!(
         "    (Emoji images must be named based off their unicode path, see Twemoji assets/16x16)"
