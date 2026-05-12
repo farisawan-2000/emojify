@@ -1,30 +1,18 @@
-use image::{
-    RgbaImage,
-    DynamicImage,
-    Rgba,
-    Frame,
-    imageops,
-};
-use std::collections::HashMap;
 use super::rgb2emoji;
 use crate::config;
+use image::{DynamicImage, Frame, Rgba, RgbaImage, imageops};
+use std::collections::HashMap;
 
 fn pack_color(payload: (u32, u32, &Rgba<u8>)) -> (u32, u32, u32) {
     let px = payload.2;
-    let color = ((px[0] as u32) << 24)
-         | ((px[1] as u32) << 16)
-         | ((px[2] as u32) << 8)
-         | (px[3] as u32);
+    let color =
+        ((px[0] as u32) << 24) | ((px[1] as u32) << 16) | ((px[2] as u32) << 8) | (px[3] as u32);
 
     return (payload.0, payload.1, color);
 }
 
 // TODO: Convert Frame to RgbaImage and back in here
-pub fn emojify(
-    map: &mut HashMap<char, RgbaImage>,
-    tbl: &HashMap<u32, char>,
-    img: &Frame
-) -> Frame {
+pub fn emojify(map: &mut HashMap<char, RgbaImage>, tbl: &HashMap<u32, char>, img: &Frame) -> Frame {
     let image = img.buffer();
     let delay = img.delay();
 
@@ -34,13 +22,13 @@ pub fn emojify(
 
     let pixels = image.enumerate_pixels().map(pack_color);
 
-    let mut emojis : Vec<char> = Vec::new();
+    let mut emojis: Vec<char> = Vec::new();
     for i in pixels {
         emojis.push(rgb2emoji::search(tbl, i.2));
     }
 
-    let mut x : u32 = 0;
-    let mut y : u32 = 0;
+    let mut x: u32 = 0;
+    let mut y: u32 = 0;
 
     let mut cursor = 0;
 
@@ -58,4 +46,3 @@ pub fn emojify(
 
     return Frame::from_parts(resultImg.into_rgba8(), 0, 0, delay);
 }
-

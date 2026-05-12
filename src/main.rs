@@ -1,32 +1,30 @@
 #![allow(non_snake_case)]
 
-use std::process::exit;
-use std::path::Path;
-use std::fs::File;
-use attohttpc;
-use image::{
-    DynamicImage,
-    RgbaImage,
-    Frame,
-    Delay,
-    imageops::FilterType::Lanczos3,
-    AnimationDecoder,
-};
-use image::io::Reader as ImageReader;
-use std::collections::HashMap;
-use image::codecs::gif::{Repeat, GifDecoder, GifEncoder};
-use std::io::{BufReader, BufWriter};
 use arboard::Clipboard;
+use attohttpc;
+use image::codecs::gif::{GifDecoder, GifEncoder, Repeat};
+use image::io::Reader as ImageReader;
+use image::{
+    AnimationDecoder, Delay, DynamicImage, Frame, RgbaImage, imageops::FilterType::Lanczos3,
+};
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
+use std::path::Path;
+use std::process::exit;
 
-mod emojify;
 mod config;
+mod emojify;
 mod rgb2emoji;
 
 fn open_img(width: u32, path: &String) -> Frame {
     println!("Opening {} as image...", path);
-    let img = ImageReader::open(path).unwrap()
-        .with_guessed_format().unwrap()
-        .decode().unwrap()
+    let img = ImageReader::open(path)
+        .unwrap()
+        .with_guessed_format()
+        .unwrap()
+        .decode()
+        .unwrap()
         .resize(width, 999999, Lanczos3)
         .into_rgba8();
 
@@ -34,7 +32,10 @@ fn open_img(width: u32, path: &String) -> Frame {
 }
 
 fn usage() {
-    println!("Usage: {} image_width [path/to/image or leave blank for clipboard]", std::env::args().nth(0).unwrap());
+    println!(
+        "Usage: {} image_width [path/to/image or leave blank for clipboard]",
+        std::env::args().nth(0).unwrap()
+    );
 }
 
 fn open_gif(width: u32, path: &String) -> Vec<Frame> {
@@ -43,14 +44,10 @@ fn open_gif(width: u32, path: &String) -> Vec<Frame> {
     let frames = decoder.into_frames();
     let frames = frames.collect_frames().expect("error decoding gif");
 
-    let mut ret : Vec<Frame> = Vec::new();
+    let mut ret: Vec<Frame> = Vec::new();
 
     for f in frames {
-        let frm = DynamicImage::ImageRgba8(
-                      f.clone().into_buffer()
-                  ).resize(
-                      width, 999999, Lanczos3
-                  );
+        let frm = DynamicImage::ImageRgba8(f.clone().into_buffer()).resize(width, 999999, Lanczos3);
         ret.push(Frame::from_parts(frm.into_rgba8(), 0, 0, f.delay()));
     }
 
@@ -67,31 +64,31 @@ fn truncate_string_at_char(s: &mut String, character: char) -> String {
 }
 
 fn main() -> std::io::Result<()> {
-    let args : Vec<String> = std::env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
 
     match args.len() {
         1 => {
             usage();
             exit(1);
-        },
+        }
         2 | 3 => {
             // good
-        },
+        }
         _ => {
             usage();
             exit(1);
-        },
+        }
     }
 
     // get width
-    let im_width : u32 = str::parse::<u32>(&args[1]).unwrap();
+    let im_width: u32 = str::parse::<u32>(&args[1]).unwrap();
 
     let emojiTable = rgb2emoji::generate(); // color -> emoji char
 
     // populate the emoji -> image map using stored font
     // TODO: serialize?
     println!("Populating emoji map...");
-    let mut emojimap : HashMap<char, RgbaImage> = HashMap::new(); // char -> image
+    let mut emojimap: HashMap<char, RgbaImage> = HashMap::new(); // char -> image
     let home = std::env::var("HOME").unwrap();
     for (_i, c) in &emojiTable {
         let emojipath = config::get_emoji_path(&home, *c as u32);
@@ -100,9 +97,8 @@ fn main() -> std::io::Result<()> {
             emojimap.insert(*c, em.into_rgba8());
         }
     }
-    
 
-    let filepath : &String = match args.len() {
+    let filepath: &String = match args.len() {
         2 => {
             // clipboard; guess format
             let mut clipboard = Clipboard::new().unwrap();
@@ -122,25 +118,30 @@ fn main() -> std::io::Result<()> {
                 let _ = std::fs::create_dir("cacheDownload/");
 
                 // Check if the status is a 2XX code.
-                if let Ok(resp) = attohttpc::get(&gt).send() && resp.is_success() {
-                    let fil = File::create(format!("cacheDownload/{}", basename)).unwrap();
+                if let Ok(resp) = attohttpc::get(&gt).send()
+                    && resp.is_success()
+                    && let Ok(fil) = File::create(format!("cacheDownload/{}", basename))
+                {
                     // Consume the response body as text and print it.
                     // let tmpImg = DynamicImage::from_bytes(resp.bytes());
                     match resp.headers()["content-type"].to_str() {
                         Ok("image/gif") => {
                             let _ = resp.write_to(fil);
-                        },
+                        }
                         Ok("image/jpeg") => {
                             let _ = resp.write_to(fil);
-                        },
+                        }
                         Ok("image/png") => {
                             let _ = resp.write_to(fil);
-                        },
+                        }
                         Ok("image/webp") => {
                             let _ = resp.write_to(fil);
-                        },
+                        }
                         Ok(_) => {
-                            println!("{:?} is not a supported file!", resp.headers()["content-type"]);
+                            println!(
+                                "{:?} is not a supported file!",
+                                resp.headers()["content-type"]
+                            );
                             exit(1);
                         }
                         _ => {
@@ -152,18 +153,15 @@ fn main() -> std::io::Result<()> {
                     println!("'{}' is not a URL!", gt);
                     exit(1);
                 }
-
             }
 
             &String::from(format!("cacheDownload/{}", basename))
-        },
-        3 => {
-            &args[2]
-        },
+        }
+        3 => &args[2],
         _ => {
             usage();
             exit(1);
-        },
+        }
     };
 
     println!("Converting {} to emojis...", &filepath);
@@ -185,12 +183,12 @@ fn main() -> std::io::Result<()> {
 
                 let _ = encoder.encode_frame(result);
             }
-        },
+        }
         Some("png") | Some("jpg") | Some("webp") => {
             let img = open_img(im_width, filepath);
             let result = emojify::emojify(&mut emojimap, &emojiTable, &img).into_buffer();
             let _ = result.save("output.png");
-        },
+        }
         Some(&_) => {
             println!("Filepath not supported: {}", filepath);
             exit(1);
@@ -200,7 +198,6 @@ fn main() -> std::io::Result<()> {
             exit(1);
         }
     }
- 
 
-    Ok(())   
+    Ok(())
 }

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use maplit::hashmap;
+use std::collections::HashMap;
 
 pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {
     if entry & 0xFF < 128 {
@@ -14,7 +14,7 @@ pub fn search(tbl: &HashMap<u32, char>, entry: u32) -> char {
 
         let rd = (r_c as i32 - ((entry >> 24) & 0xFF) as i32).pow(2) as u32;
         let gd = (g_c as i32 - ((entry >> 16) & 0xFF) as i32).pow(2) as u32;
-        let bd = (b_c as i32 - ((entry >> 8)  & 0xFF) as i32).pow(2) as u32;
+        let bd = (b_c as i32 - ((entry >> 8) & 0xFF) as i32).pow(2) as u32;
 
         if (rd + gd + bd) < min_dist {
             min_dist = rd + gd + bd;
@@ -1357,5 +1357,4 @@ pub fn generate() -> HashMap<u32, char> {
         0x3D5745 => '®',
         0xAAAEAE => '',
     );
-
 }
