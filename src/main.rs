@@ -120,8 +120,8 @@ fn main() -> std::io::Result<()> {
                 // Check if the status is a 2XX code.
                 if let Ok(resp) = attohttpc::get(&gt).send()
                     && resp.is_success()
-                    && let Ok(fil) = File::create(format!("cacheDownload/{}", basename))
                 {
+                    let fil = File::create(format!("cacheDownload/{}", basename))?;
                     // Consume the response body as text and print it.
                     // let tmpImg = DynamicImage::from_bytes(resp.bytes());
                     match resp.headers()["content-type"].to_str() {
