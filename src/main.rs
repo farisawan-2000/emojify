@@ -96,8 +96,9 @@ fn main() -> std::io::Result<()> {
     for (_i, c) in &emojiTable {
         let emojipath = config::get_emoji_path(&home, *c as u32);
 
-        let em = image::open(emojipath.clone()).unwrap().into_rgba8();
-        emojimap.insert(*c, em);
+        if let Ok(em) = image::open(emojipath.clone()) {
+            emojimap.insert(*c, em.into_rgba8());
+        }
     }
     
 
@@ -169,11 +170,11 @@ fn main() -> std::io::Result<()> {
 
     println!("Converting {} to emojis...", &filepath);
 
-    match Path::new(&filepath).extension().unwrap().to_str() {
+    match Path::new(&filepath).extension().and_then(|s| s.to_str()) {
         Some("gif") => {
             let frames = open_gif(im_width, filepath);
 
-            let file_out = File::create("output.gif").unwrap();
+            let file_out = File::create("output.gif")?;
 
             let bufWriter = BufWriter::with_capacity(163840, file_out);
             let mut encoder = GifEncoder::new_with_speed(bufWriter, 30);
