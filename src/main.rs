@@ -127,21 +127,25 @@ fn main() -> std::io::Result<()> {
                     let fil = File::create(format!("cacheDownload/{}", basename)).unwrap();
                     // Consume the response body as text and print it.
                     // let tmpImg = DynamicImage::from_bytes(resp.bytes());
-                    match resp.headers()["content-type"].to_str().unwrap() {
-                        "image/gif" => {
+                    match resp.headers()["content-type"].to_str() {
+                        Ok("image/gif") => {
                             let _ = resp.write_to(fil);
                         },
-                        "image/jpeg" => {
+                        Ok("image/jpeg") => {
                             let _ = resp.write_to(fil);
                         },
-                        "image/png" => {
+                        Ok("image/png") => {
                             let _ = resp.write_to(fil);
                         },
-                        "image/webp" => {
+                        Ok("image/webp") => {
                             let _ = resp.write_to(fil);
                         },
-                        _ => {
+                        Ok(_) => {
                             println!("{:?} is not a supported file!", resp.headers()["content-type"]);
+                            exit(1);
+                        }
+                        _ => {
+                            println!("header has no content-type!");
                             exit(1);
                         }
                     }
